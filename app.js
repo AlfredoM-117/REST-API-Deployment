@@ -3,12 +3,25 @@ const crypto = require('node:crypto') // para crear ids
 const pc = require('picocolors')
 const movies = require('./movies.json')
 const moviesJS = require('./Schemas/movies.js')
+const cors = require('cors')
 
 const app = express()
 app.disable('x-powered-by')
 
 app.use(express.json())
-
+app.use(cors({
+  origin: (origin, callback) => {
+    // Lista de origenes aceptados
+    const ACCEPTED_ORIGINS = [
+      'http://localhost:8080',
+      'http://localhost:3000'
+    ]
+    if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
+      return callback(null, true)
+    }
+    return callback(new Error('CORS error'))
+  }
+}))
 app.get('/', (req, res) => {
   res.json({ message: 'Hola mundo' })
   console.log(pc.green('Request received: '), pc.yellow(req.url))
@@ -19,19 +32,8 @@ app.get('/', (req, res) => {
 
 // Métodos complejos: PUT/PATCH/DELETE CORS PREFLIGHT / Requieren una petición llamada OPTIONS
 
-// Lista de origenes aceptados
-const ACCEPTED_ORIGINS = [
-  'http://localhost:8080',
-  'http://localhost:3000',
-  'http://sdflksdf.com'
-]
-
 // Query por genero
 app.get('/movies', (req, res) => {
-  const origin = req.header('origin')
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin) // CORS
-  }
   const { genre } = req.query
   if (genre) {
     const filteredMovies = movies.filter(movie => movie.genre.some(g => g.toLowerCase().includes(genre.toLowerCase())))
@@ -107,11 +109,6 @@ app.patch('/movies/:id', (req, res) => {
 })
 
 app.delete('/movies/:id', (req, res) => {
-  const origin = req.header('origin')
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin) // CORS
-  }
-
   const { id } = req.params
   const movieIndex = movies.findIndex((movie) => movie.id === id)
   if (movieIndex === -1) {
@@ -125,11 +122,6 @@ app.delete('/movies/:id', (req, res) => {
 })
 
 app.options('/movies/:id', (req, res) => {
-  const origin = req.header('origin')
-  if (ACCEPTED_ORIGINS.includes(origin) || !origin) {
-    res.setHeader('Access-Control-Allow-Origin', origin) // CORS
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE')
-  }
   res.send('200')
 })
 
