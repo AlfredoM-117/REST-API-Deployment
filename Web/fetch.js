@@ -1,4 +1,4 @@
-fetch('http://localhost:3000/movies')
+fetch('https://rest-api-deployment-dev-znba.3.us-1.fl0.io/movies')
   .then(response => response.json())
   .then(movies => {
     const html = movies.map(movie => {
@@ -19,7 +19,7 @@ fetch('http://localhost:3000/movies')
         const article = event.target.closest('article')
         const { id } = article.dataset
 
-        fetch(`http://localhost:3000/movies/${id}`, {
+        fetch(`https://rest-api-deployment-dev-znba.3.us-1.fl0.io/movies/${id}`, {
           method: 'DELETE'
         })
           .then(response => {
